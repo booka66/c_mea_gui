@@ -33,6 +33,7 @@
 
 #Qt Moc files
 moc_*.cpp
+moc_*.h
 
 # Stash files
 *.stash
