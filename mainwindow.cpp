@@ -10,152 +10,158 @@
 #include <QVBoxLayout>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <H5Cpp.h>
-#include <cmath>
 #include <iostream>
-#include <stdexcept>
+#include <string>
 #include <vector>
 
-struct HDFData {
+struct ChannelData {
   std::vector<double> signal;
-  std::vector<double> time;
-  double samplingRate;
-  hsize_t totalFrames;
+  std::vector<int> name;
 };
 
-HDFData loadHDFData(const std::string &filePath) {
+struct ElectrodeInfo {
+  int Row;
+  int Col;
+};
+
+std::pair<std::vector<int>, std::vector<int>>
+getChs(const std::string &FilePath) {
   try {
-    H5::H5File file(filePath, H5F_ACC_RDONLY);
+    std::cout << "Opening file: " << FilePath << std::endl;
+    H5::H5File file(FilePath, H5F_ACC_RDONLY);
 
-    // Read NRecFrames
-    H5::DataSet nRecFramesDataset =
-        file.openDataSet("/3BRecInfo/3BRecVars/NRecFrames");
-    hsize_t nRecFrames;
-    nRecFramesDataset.read(&nRecFrames, H5::PredType::NATIVE_HSIZE);
-    std::cout << "NRecFrames: " << nRecFrames << std::endl;
+    std::cout << "Opening dataset: /3BRecInfo/3BMeaStreams/Raw/Chs"
+              << std::endl;
+    H5::DataSet dataset = file.openDataSet("/3BRecInfo/3BMeaStreams/Raw/Chs");
 
-    // Read sampling rate
-    H5::DataSet sampRateDataset =
-        file.openDataSet("/3BRecInfo/3BRecVars/SamplingRate");
-    double sampRate;
-    sampRateDataset.read(&sampRate, H5::PredType::NATIVE_DOUBLE);
-    std::cout << "Sampling Rate: " << sampRate << std::endl;
-
-    // Read raw data
-    H5::DataSet rawDataset = file.openDataSet("/3BData/Raw");
-    H5::DataSpace dataspace = rawDataset.getSpace();
-    int rank = dataspace.getSimpleExtentNdims();
+    H5::DataSpace dataspace = dataset.getSpace();
     hsize_t dims[2];
-    dataspace.getSimpleExtentDims(dims, NULL);
-    std::cout << "Raw data dimensions: " << dims[0] << " x " << dims[1]
+    int ndims = dataspace.getSimpleExtentDims(dims, NULL);
+
+    std::cout << "Dataset dimensions: " << dims[0] << " x " << dims[1]
               << std::endl;
 
-    // Determine the number of frames to read
-    hsize_t framesToRead = std::min(nRecFrames, dims[0] * dims[1]);
-    std::cout << "Frames to read: " << framesToRead << std::endl;
+    H5::CompType mtype(sizeof(int) * 2);
+    mtype.insertMember("Row", 0, H5::PredType::NATIVE_INT);
+    mtype.insertMember("Col", sizeof(int), H5::PredType::NATIVE_INT);
 
-    // Prepare to read data
-    std::vector<int> rawData(framesToRead);
-    H5::DataSpace memspace(1, &framesToRead);
+    std::vector<std::pair<int, int>> data(dims[0]);
 
-    // Select hyperslab
-    hsize_t start[2] = {0, 0};
-    hsize_t count[2] = {1, 1};
-    hsize_t stride[2] = {1, 1};
-    hsize_t block[2] = {1, 1};
+    std::cout << "Reading dataset" << std::endl;
+    dataset.read(data.data(), mtype);
 
-    if (rank == 2) {
-      count[0] = std::min(framesToRead, dims[0]);
-      count[1] = 1;
-      block[1] = std::min(framesToRead / count[0], dims[1]);
-    } else if (rank == 1) {
-      count[0] = framesToRead;
-    } else {
-      throw std::runtime_error("Unexpected dataset rank: " +
-                               std::to_string(rank));
+    std::vector<int> rows(dims[0]);
+    std::vector<int> cols(dims[0]);
+
+    for (size_t i = 0; i < dims[0]; ++i) {
+      rows[i] = data[i].first;
+      cols[i] = data[i].second;
     }
 
-    std::cout << "Hyperslab selection: start=" << start[0] << "," << start[1]
-              << " count=" << count[0] << "," << count[1]
-              << " stride=" << stride[0] << "," << stride[1]
-              << " block=" << block[0] << "," << block[1] << std::endl;
+    std::cout << "Successfully read " << rows.size() << " rows and columns"
+              << std::endl;
 
-    dataspace.selectHyperslab(H5S_SELECT_SET, count, start, stride, block);
-
-    // Read the data
-    rawDataset.read(rawData.data(), H5::PredType::NATIVE_INT, memspace,
-                    dataspace);
-
-    // Read conversion factors
-    int signalInversion = 1;
-    double maxVolt = 1.0, minVolt = -1.0;
-    int bitDepth = 16;
-
-    try {
-      H5::DataSet signalInversionDataset =
-          file.openDataSet("/3BRecInfo/3BRecVars/SignalInversion");
-      signalInversionDataset.read(&signalInversion, H5::PredType::NATIVE_INT);
-    } catch (H5::Exception &e) {
-      std::cerr
-          << "Warning: Couldn't read SignalInversion, using default value."
-          << std::endl;
-    }
-
-    try {
-      H5::DataSet maxVoltDataset =
-          file.openDataSet("/3BRecInfo/3BRecVars/MaxVolt");
-      maxVoltDataset.read(&maxVolt, H5::PredType::NATIVE_DOUBLE);
-    } catch (H5::Exception &e) {
-      std::cerr << "Warning: Couldn't read MaxVolt, using default value."
-                << std::endl;
-    }
-
-    try {
-      H5::DataSet minVoltDataset =
-          file.openDataSet("/3BRecInfo/3BRecVars/MinVolt");
-      minVoltDataset.read(&minVolt, H5::PredType::NATIVE_DOUBLE);
-    } catch (H5::Exception &e) {
-      std::cerr << "Warning: Couldn't read MinVolt, using default value."
-                << std::endl;
-    }
-
-    try {
-      H5::DataSet bitDepthDataset =
-          file.openDataSet("/3BRecInfo/3BRecVars/BitDepth");
-      bitDepthDataset.read(&bitDepth, H5::PredType::NATIVE_INT);
-    } catch (H5::Exception &e) {
-      std::cerr << "Warning: Couldn't read BitDepth, using default value."
-                << std::endl;
-    }
-
-    double qLevel = std::pow(2, bitDepth);
-    double fromQLevelToUVolt = (maxVolt - minVolt) / qLevel;
-    double ADCCountsToMV = signalInversion * fromQLevelToUVolt;
-    double MVOffset = signalInversion * minVolt;
-
-    // Process data
-    std::vector<double> signal(framesToRead);
-    for (hsize_t i = 0; i < framesToRead; ++i) {
-      signal[i] = ((rawData[i] * ADCCountsToMV) + MVOffset) / 1000000.0;
-    }
-
-    // Generate time vector
-    std::vector<double> time(framesToRead);
-    for (hsize_t i = 0; i < framesToRead; ++i) {
-      time[i] = static_cast<double>(i) / sampRate;
-    }
-
-    std::cout << "Data processing completed successfully" << std::endl;
-
-    return {signal, time, sampRate, framesToRead};
+    return std::make_pair(std::move(rows), std::move(cols));
   } catch (H5::Exception &error) {
-    std::ostringstream oss;
-    oss << "Error reading HDF5 file: " << error.getDetailMsg() << "\n";
-    throw std::runtime_error(oss.str());
+    std::cerr << "H5 Exception: ";
+    error.printErrorStack();
+    throw std::runtime_error("Error reading HDF5 file");
   } catch (std::exception &e) {
-    throw std::runtime_error("Error in loadHDFData: " + std::string(e.what()));
+    std::cerr << "Standard exception: " << e.what() << std::endl;
+    throw;
+  } catch (...) {
+    std::cerr << "Unknown exception occurred" << std::endl;
+    throw;
+  }
+}
+
+std::vector<ChannelData> get_cat_envelop(const std::string &FileName) {
+  try {
+    H5::H5File file(FileName, H5F_ACC_RDONLY);
+
+    auto readDataset = [&file](const std::string &path) {
+      H5::DataSet dataset = file.openDataSet(path);
+      H5::DataSpace dataspace = dataset.getSpace();
+      H5T_class_t type_class = dataset.getTypeClass();
+
+      if (type_class == H5T_INTEGER) {
+        int data;
+        dataset.read(&data, H5::PredType::NATIVE_INT);
+        return static_cast<double>(data);
+      } else if (type_class == H5T_FLOAT) {
+        double data;
+        dataset.read(&data, H5::PredType::NATIVE_DOUBLE);
+        return data;
+      } else {
+        throw std::runtime_error("Unsupported data type");
+      }
+    };
+
+    long long NRecFrames =
+        static_cast<long long>(readDataset("/3BRecInfo/3BRecVars/NRecFrames"));
+    double sampRate = readDataset("/3BRecInfo/3BRecVars/SamplingRate");
+    double signalInversion =
+        readDataset("/3BRecInfo/3BRecVars/SignalInversion");
+    double maxUVolt = readDataset("/3BRecInfo/3BRecVars/MaxVolt");
+    double minUVolt = readDataset("/3BRecInfo/3BRecVars/MinVolt");
+    int bitDepth =
+        static_cast<int>(readDataset("/3BRecInfo/3BRecVars/BitDepth"));
+
+    // Calculate qLevel using bitwise XOR
+    uint64_t qLevel =
+        static_cast<uint64_t>(2) ^ static_cast<uint64_t>(bitDepth);
+
+    double fromQLevelToUVolt =
+        (maxUVolt - minUVolt) / static_cast<double>(qLevel);
+    double ADCCountsToMV = signalInversion * fromQLevelToUVolt;
+    double MVOffset = signalInversion * minUVolt;
+
+    auto [Rows, Cols] = getChs(FileName);
+    int total_channels = Rows.size();
+
+    H5::DataSet full_data = file.openDataSet("/3BData/Raw");
+    H5::DataSpace dataspace = full_data.getSpace();
+    hsize_t dims[2];
+    dataspace.getSimpleExtentDims(dims, NULL);
+
+    std::vector<ChannelData> channelDataList;
+
+    for (int k = 0; k < total_channels; ++k) {
+      std::vector<double> channel_data(NRecFrames);
+      hsize_t count[2] = {static_cast<hsize_t>(NRecFrames), 1};
+      hsize_t offset[2] = {0, static_cast<hsize_t>(k)};
+      H5::DataSpace memspace(1, count);
+      H5::DataSpace filespace = full_data.getSpace();
+      filespace.selectHyperslab(H5S_SELECT_SET, count, offset);
+      full_data.read(channel_data.data(), H5::PredType::NATIVE_DOUBLE, memspace,
+                     filespace);
+
+      for (auto &val : channel_data) {
+        val = (val * ADCCountsToMV + MVOffset) / 10000000.0;
+      }
+
+      ChannelData ch_data;
+      ch_data.signal = std::move(channel_data);
+      ch_data.name = {Rows[k], Cols[k]};
+
+      channelDataList.push_back(std::move(ch_data));
+    }
+
+    return channelDataList;
+  } catch (H5::Exception &error) {
+    std::cerr << "H5 Exception: ";
+    error.printErrorStack();
+    throw std::runtime_error("Error reading HDF5 file");
+  } catch (std::exception &e) {
+    std::cerr << "Standard exception: " << e.what() << std::endl;
+    throw;
+  } catch (...) {
+    std::cerr << "Unknown exception occurred" << std::endl;
+    throw;
   }
 }
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
@@ -171,8 +177,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 }
 
 void MainWindow::testGraph() {
-  std::string filePath =
-      "~/Desktop/Neo Se/6-13-2024-slice2b_00_resample_300.brw";
+  std::string filePath = "Users/booka66/Jake-Squared/Sz_SE_Detection/"
+                         "5_1_24_slice3A_resample_300.brw";
 
   // Expand the ~ in the file path
   if (filePath.find("~") == 0) {
@@ -204,22 +210,32 @@ void MainWindow::testGraph() {
     QMessageBox::information(this, "Success", "HDF5 file opened successfully.");
 
     // Now try to load the data
-    HDFData data = loadHDFData(filePath);
+    auto channelDataList = get_cat_envelop(filePath);
 
     // If we got here, data was loaded successfully
     QMessageBox::information(
         this, "Success",
-        QString(
-            "Data loaded successfully.\nTotal frames: %1\nSampling rate: %2")
-            .arg(data.totalFrames)
-            .arg(data.samplingRate));
+        QString("Data loaded successfully.\nTotal channels: %1")
+            .arg(channelDataList.size()));
 
-    // Plot the data
-    for (int i = 0; i < graphWidget->plotWidgets.size(); ++i) {
-      graphWidget->simplePlot(
-          QList<double>(data.time.begin(), data.time.end()),
-          QList<double>(data.signal.begin(), data.signal.end()), i);
+    // Plot the data for each channel
+    for (size_t i = 0; i < 4; ++i) {
+      const auto &channelData = channelDataList[i];
+
+      // Create x-axis data (time)
+      QVector<double> xData(channelData.signal.size());
+      for (size_t j = 0; j < xData.size(); ++j) {
+        xData[j] = static_cast<double>(j);
+      }
+
+      // Convert signal data to QVector
+      QVector<double> yData(channelData.signal.begin(),
+                            channelData.signal.end());
+
+      // Plot the data
+      graphWidget->simplePlot(xData, yData, i);
     }
+
   } catch (const H5::FileIException &e) {
     QMessageBox::critical(
         this, "HDF5 File Error",
