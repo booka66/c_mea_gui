@@ -41,4 +41,5 @@ moc_*.h
 compile_commands.json
 Makefile
 .cache/
+.DS_Store
 

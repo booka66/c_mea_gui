@@ -21,15 +21,22 @@ public:
   void toggleMiniMap(bool checked);
   void updateRedLines(double value, double samplingRate);
   void changeViewMode(const QString &mode);
+  void simplePlot(const QList<double> &x, const QList<double> &y,
+                  int graphIndex);
+  QVector<QCustomPlot *> plotWidgets;
 
 signals:
   void regionClicked(double start, double stop, int plotIndex);
   void saveSinglePlot();
   void saveAllPlots();
+  void rightClickedAndDragged(QCPRange range, int plotIndex);
 
 private slots:
   void updateMinimap();
   void updatePlotViews();
+  void onMousePress(QMouseEvent *event);
+  void onMouseMove(QMouseEvent *event);
+  void onMouseRelease(QMouseEvent *event);
 
 private:
   QVBoxLayout *layout;
@@ -37,7 +44,6 @@ private:
   QCPItemRect *minimapRegion;
   QWidget *plotsContainer;
   QVBoxLayout *plotsLayout;
-  QVector<QCustomPlot *> plotWidgets;
   QVector<QCPItemLine *> redLines;
   QVector<QCPGraph *> plots;
   QVector<QVector<double>> xData;
@@ -46,6 +52,11 @@ private:
   bool doShowRegions;
   bool doShowMiniMap;
   int lastActivePlotIndex;
+
+  bool isRightClickDragging;
+  bool isLeftClickDragging;
+  QPoint dragStartPosition;
+  int currentDraggingPlotIndex;
 
   void setupMinimap();
   void setupPlotWidgets();
@@ -58,6 +69,8 @@ private:
   void hideRegions();
   QVector<double> downsampleData(const QVector<double> &x,
                                  const QVector<double> &y, int numPoints);
+  void setupPlotInteractions();
+  void linkAxes();
 };
 
 #endif // GRAPHWIDGET_H

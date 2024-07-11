@@ -17,7 +17,7 @@ CXX           = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefau
 DEFINES       = -DQT_NO_DEBUG -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -O2 $(EXPORT_ARCH_ARGS) -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.0 -Wall -Wextra $(DEFINES)
 CXXFLAGS      = -pipe -stdlib=libc++ -O2 -std=gnu++1z $(EXPORT_ARCH_ARGS) -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.0 -Wall -Wextra $(DEFINES)
-INCPATH       = -I. -I/opt/homebrew/lib/QtPrintSupport.framework/Headers -I/opt/homebrew/lib/QtWidgets.framework/Headers -I/opt/homebrew/lib/QtGui.framework/Headers -I/opt/homebrew/lib/QtCore.framework/Headers -I. -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/OpenGL.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/AGL.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/OpenGL.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/AGL.framework/Headers -I/opt/homebrew/share/qt/mkspecs/macx-clang -F/opt/homebrew/lib
+INCPATH       = -I. -I/opt/homebrew/Cellar/hdf5/1.14.3_1/include -I/opt/homebrew/lib/QtPrintSupport.framework/Headers -I/opt/homebrew/lib/QtWidgets.framework/Headers -I/opt/homebrew/lib/QtGui.framework/Headers -I/opt/homebrew/lib/QtCore.framework/Headers -I. -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/OpenGL.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/AGL.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/OpenGL.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/AGL.framework/Headers -I/opt/homebrew/share/qt/mkspecs/macx-clang -F/opt/homebrew/lib
 QMAKE         = /opt/homebrew/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -40,7 +40,7 @@ DISTNAME      = mea_gui1.0.0
 DISTDIR = /Users/booka66/c_mea_gui/.tmp/mea_gui1.0.0
 LINK          = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 LFLAGS        = -stdlib=libc++ -headerpad_max_install_names $(EXPORT_ARCH_ARGS) -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.0 -Wl,-rpath,@executable_path/../Frameworks -Wl,-rpath,/opt/homebrew/lib
-LIBS          = $(SUBLIBS) -F/opt/homebrew/lib -framework QtPrintSupport -framework ApplicationServices -framework QtWidgets -framework QtGui -framework AppKit -framework ImageIO -framework Metal -framework QtCore -framework IOKit -framework DiskArbitration -lcups -framework AGL -framework OpenGL   
+LIBS          = $(SUBLIBS) -F/opt/homebrew/lib -L/opt/homebrew/Cellar/hdf5/1.14.3_1/lib -lhdf5 -lhdf5_cpp -framework QtPrintSupport -framework ApplicationServices -framework QtWidgets -framework QtGui -framework AppKit -framework ImageIO -framework Metal -framework QtCore -framework IOKit -framework DiskArbitration -lcups -framework AGL -framework OpenGL   
 AR            = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar cq
 RANLIB        = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib -s
 SED           = sed
@@ -387,6 +387,7 @@ DIST          = /opt/homebrew/share/qt/mkspecs/features/spec_pre.prf \
 		/opt/homebrew/share/qt/mkspecs/features/qt_config.prf \
 		/opt/homebrew/share/qt/mkspecs/macx-clang/qmake.conf \
 		/opt/homebrew/share/qt/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/opt/homebrew/share/qt/mkspecs/features/exclusive_builds.prf \
 		/opt/homebrew/share/qt/mkspecs/features/mac/sdk.prf \
 		/opt/homebrew/share/qt/mkspecs/features/toolchain.prf \
@@ -433,7 +434,7 @@ TARGET        = mea_gui.app/Contents/MacOS/mea_gui
 EXPORT_QMAKE_MAC_SDK = macosx
 EXPORT_QMAKE_MAC_SDK_VERSION = 14.5
 EXPORT_QMAKE_XCODE_DEVELOPER_PATH = /Applications/Xcode.app/Contents/Developer
-EXPORT__QMAKE_STASH_ = 
+EXPORT__QMAKE_STASH_ = /Users/booka66/c_mea_gui/.qmake.stash
 EXPORT_VALID_ARCHS = arm64
 EXPORT_DEFAULT_ARCHS = arm64
 EXPORT_ARCHS = $(filter $(EXPORT_VALID_ARCHS), $(if $(ARCHS), $(ARCHS), $(if $(EXPORT_DEFAULT_ARCHS), $(EXPORT_DEFAULT_ARCHS), $(EXPORT_VALID_ARCHS))))
@@ -763,6 +764,7 @@ Makefile: mea_gui.pro /opt/homebrew/share/qt/mkspecs/macx-clang/qmake.conf /opt/
 		/opt/homebrew/share/qt/mkspecs/features/qt_config.prf \
 		/opt/homebrew/share/qt/mkspecs/macx-clang/qmake.conf \
 		/opt/homebrew/share/qt/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/opt/homebrew/share/qt/mkspecs/features/exclusive_builds.prf \
 		/opt/homebrew/share/qt/mkspecs/features/mac/sdk.prf \
 		/opt/homebrew/share/qt/mkspecs/features/toolchain.prf \
@@ -1111,6 +1113,7 @@ Makefile: mea_gui.pro /opt/homebrew/share/qt/mkspecs/macx-clang/qmake.conf /opt/
 /opt/homebrew/share/qt/mkspecs/features/qt_config.prf:
 /opt/homebrew/share/qt/mkspecs/macx-clang/qmake.conf:
 /opt/homebrew/share/qt/mkspecs/features/spec_post.prf:
+.qmake.stash:
 /opt/homebrew/share/qt/mkspecs/features/exclusive_builds.prf:
 /opt/homebrew/share/qt/mkspecs/features/mac/sdk.prf:
 /opt/homebrew/share/qt/mkspecs/features/toolchain.prf:
@@ -1180,6 +1183,7 @@ clean: compiler_clean
 
 distclean: clean 
 	-$(DEL_FILE) -r mea_gui.app
+	-$(DEL_FILE) .qmake.stash
 	-$(DEL_FILE) Makefile
 
 
@@ -1208,6 +1212,17 @@ compiler_moc_header_make_all: moc_mainwindow.cpp moc_gridwidget.cpp moc_colorcel
 compiler_moc_header_clean:
 	-$(DEL_FILE) moc_mainwindow.cpp moc_gridwidget.cpp moc_colorcell.cpp moc_qcustomplot.cpp moc_graphwidget.cpp
 moc_mainwindow.cpp: mainwindow.h \
+		graphwidget.h \
+		/opt/homebrew/lib/QtWidgets.framework/Headers/QMessageBox \
+		/opt/homebrew/lib/QtWidgets.framework/Headers/qmessagebox.h \
+		/opt/homebrew/lib/QtWidgets.framework/Headers/QVBoxLayout \
+		/opt/homebrew/lib/QtWidgets.framework/Headers/qboxlayout.h \
+		/opt/homebrew/lib/QtWidgets.framework/Headers/QWidget \
+		/opt/homebrew/lib/QtWidgets.framework/Headers/qwidget.h \
+		qcustomplot.h \
+		/opt/homebrew/lib/QtCore.framework/Headers/qmath.h \
+		/opt/homebrew/lib/QtCore.framework/Headers/qnumeric.h \
+		/opt/homebrew/lib/QtCore.framework/Headers/QtNumeric \
 		gridwidget.h \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/QGraphicsView \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/qgraphicsview.h \
@@ -1225,17 +1240,6 @@ moc_mainwindow.cpp: mainwindow.h \
 		/opt/homebrew/lib/QtGui.framework/Headers/qcolor.h \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/QLabel \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/qlabel.h \
-		graphwidget.h \
-		/opt/homebrew/lib/QtWidgets.framework/Headers/QMessageBox \
-		/opt/homebrew/lib/QtWidgets.framework/Headers/qmessagebox.h \
-		/opt/homebrew/lib/QtWidgets.framework/Headers/QVBoxLayout \
-		/opt/homebrew/lib/QtWidgets.framework/Headers/qboxlayout.h \
-		/opt/homebrew/lib/QtWidgets.framework/Headers/QWidget \
-		/opt/homebrew/lib/QtWidgets.framework/Headers/qwidget.h \
-		qcustomplot.h \
-		/opt/homebrew/lib/QtCore.framework/Headers/qmath.h \
-		/opt/homebrew/lib/QtCore.framework/Headers/qnumeric.h \
-		/opt/homebrew/lib/QtCore.framework/Headers/QtNumeric \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/QCheckBox \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/qcheckbox.h \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/QComboBox \
@@ -1250,7 +1254,7 @@ moc_mainwindow.cpp: mainwindow.h \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/qtabwidget.h \
 		moc_predefs.h \
 		/opt/homebrew/share/qt/libexec/moc
-	/opt/homebrew/share/qt/libexec/moc $(DEFINES) --include /Users/booka66/c_mea_gui/moc_predefs.h -I/opt/homebrew/share/qt/mkspecs/macx-clang -I/Users/booka66/c_mea_gui -I/opt/homebrew/lib/QtPrintSupport.framework/Headers -I/opt/homebrew/lib/QtWidgets.framework/Headers -I/opt/homebrew/lib/QtGui.framework/Headers -I/opt/homebrew/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/opt/homebrew/lib mainwindow.h -o moc_mainwindow.cpp
+	/opt/homebrew/share/qt/libexec/moc $(DEFINES) --include /Users/booka66/c_mea_gui/moc_predefs.h -I/opt/homebrew/share/qt/mkspecs/macx-clang -I/Users/booka66/c_mea_gui -I/opt/homebrew/Cellar/hdf5/1.14.3_1/include -I/opt/homebrew/lib/QtPrintSupport.framework/Headers -I/opt/homebrew/lib/QtWidgets.framework/Headers -I/opt/homebrew/lib/QtGui.framework/Headers -I/opt/homebrew/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/opt/homebrew/lib mainwindow.h -o moc_mainwindow.cpp
 
 moc_gridwidget.cpp: gridwidget.h \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/QGraphicsView \
@@ -1271,7 +1275,7 @@ moc_gridwidget.cpp: gridwidget.h \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/qlabel.h \
 		moc_predefs.h \
 		/opt/homebrew/share/qt/libexec/moc
-	/opt/homebrew/share/qt/libexec/moc $(DEFINES) --include /Users/booka66/c_mea_gui/moc_predefs.h -I/opt/homebrew/share/qt/mkspecs/macx-clang -I/Users/booka66/c_mea_gui -I/opt/homebrew/lib/QtPrintSupport.framework/Headers -I/opt/homebrew/lib/QtWidgets.framework/Headers -I/opt/homebrew/lib/QtGui.framework/Headers -I/opt/homebrew/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/opt/homebrew/lib gridwidget.h -o moc_gridwidget.cpp
+	/opt/homebrew/share/qt/libexec/moc $(DEFINES) --include /Users/booka66/c_mea_gui/moc_predefs.h -I/opt/homebrew/share/qt/mkspecs/macx-clang -I/Users/booka66/c_mea_gui -I/opt/homebrew/Cellar/hdf5/1.14.3_1/include -I/opt/homebrew/lib/QtPrintSupport.framework/Headers -I/opt/homebrew/lib/QtWidgets.framework/Headers -I/opt/homebrew/lib/QtGui.framework/Headers -I/opt/homebrew/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/opt/homebrew/lib gridwidget.h -o moc_gridwidget.cpp
 
 moc_colorcell.cpp: colorcell.h \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/QGraphicsRectItem \
@@ -1286,7 +1290,7 @@ moc_colorcell.cpp: colorcell.h \
 		/opt/homebrew/lib/QtCore.framework/Headers/qtimer.h \
 		moc_predefs.h \
 		/opt/homebrew/share/qt/libexec/moc
-	/opt/homebrew/share/qt/libexec/moc $(DEFINES) --include /Users/booka66/c_mea_gui/moc_predefs.h -I/opt/homebrew/share/qt/mkspecs/macx-clang -I/Users/booka66/c_mea_gui -I/opt/homebrew/lib/QtPrintSupport.framework/Headers -I/opt/homebrew/lib/QtWidgets.framework/Headers -I/opt/homebrew/lib/QtGui.framework/Headers -I/opt/homebrew/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/opt/homebrew/lib colorcell.h -o moc_colorcell.cpp
+	/opt/homebrew/share/qt/libexec/moc $(DEFINES) --include /Users/booka66/c_mea_gui/moc_predefs.h -I/opt/homebrew/share/qt/mkspecs/macx-clang -I/Users/booka66/c_mea_gui -I/opt/homebrew/Cellar/hdf5/1.14.3_1/include -I/opt/homebrew/lib/QtPrintSupport.framework/Headers -I/opt/homebrew/lib/QtWidgets.framework/Headers -I/opt/homebrew/lib/QtGui.framework/Headers -I/opt/homebrew/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/opt/homebrew/lib colorcell.h -o moc_colorcell.cpp
 
 moc_qcustomplot.cpp: qcustomplot.h \
 		/opt/homebrew/lib/QtCore.framework/Headers/qmath.h \
@@ -1294,7 +1298,7 @@ moc_qcustomplot.cpp: qcustomplot.h \
 		/opt/homebrew/lib/QtCore.framework/Headers/QtNumeric \
 		moc_predefs.h \
 		/opt/homebrew/share/qt/libexec/moc
-	/opt/homebrew/share/qt/libexec/moc $(DEFINES) --include /Users/booka66/c_mea_gui/moc_predefs.h -I/opt/homebrew/share/qt/mkspecs/macx-clang -I/Users/booka66/c_mea_gui -I/opt/homebrew/lib/QtPrintSupport.framework/Headers -I/opt/homebrew/lib/QtWidgets.framework/Headers -I/opt/homebrew/lib/QtGui.framework/Headers -I/opt/homebrew/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/opt/homebrew/lib qcustomplot.h -o moc_qcustomplot.cpp
+	/opt/homebrew/share/qt/libexec/moc $(DEFINES) --include /Users/booka66/c_mea_gui/moc_predefs.h -I/opt/homebrew/share/qt/mkspecs/macx-clang -I/Users/booka66/c_mea_gui -I/opt/homebrew/Cellar/hdf5/1.14.3_1/include -I/opt/homebrew/lib/QtPrintSupport.framework/Headers -I/opt/homebrew/lib/QtWidgets.framework/Headers -I/opt/homebrew/lib/QtGui.framework/Headers -I/opt/homebrew/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/opt/homebrew/lib qcustomplot.h -o moc_qcustomplot.cpp
 
 moc_graphwidget.cpp: graphwidget.h \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/QMessageBox \
@@ -1309,7 +1313,7 @@ moc_graphwidget.cpp: graphwidget.h \
 		/opt/homebrew/lib/QtCore.framework/Headers/QtNumeric \
 		moc_predefs.h \
 		/opt/homebrew/share/qt/libexec/moc
-	/opt/homebrew/share/qt/libexec/moc $(DEFINES) --include /Users/booka66/c_mea_gui/moc_predefs.h -I/opt/homebrew/share/qt/mkspecs/macx-clang -I/Users/booka66/c_mea_gui -I/opt/homebrew/lib/QtPrintSupport.framework/Headers -I/opt/homebrew/lib/QtWidgets.framework/Headers -I/opt/homebrew/lib/QtGui.framework/Headers -I/opt/homebrew/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/opt/homebrew/lib graphwidget.h -o moc_graphwidget.cpp
+	/opt/homebrew/share/qt/libexec/moc $(DEFINES) --include /Users/booka66/c_mea_gui/moc_predefs.h -I/opt/homebrew/share/qt/mkspecs/macx-clang -I/Users/booka66/c_mea_gui -I/opt/homebrew/Cellar/hdf5/1.14.3_1/include -I/opt/homebrew/lib/QtPrintSupport.framework/Headers -I/opt/homebrew/lib/QtWidgets.framework/Headers -I/opt/homebrew/lib/QtGui.framework/Headers -I/opt/homebrew/lib/QtCore.framework/Headers -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1 -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include -I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include -I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/opt/homebrew/lib graphwidget.h -o moc_graphwidget.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
@@ -1330,6 +1334,17 @@ compiler_clean: compiler_moc_predefs_clean compiler_moc_header_clean
 ####### Compile
 
 main.o: main.cpp mainwindow.h \
+		graphwidget.h \
+		/opt/homebrew/lib/QtWidgets.framework/Headers/QMessageBox \
+		/opt/homebrew/lib/QtWidgets.framework/Headers/qmessagebox.h \
+		/opt/homebrew/lib/QtWidgets.framework/Headers/QVBoxLayout \
+		/opt/homebrew/lib/QtWidgets.framework/Headers/qboxlayout.h \
+		/opt/homebrew/lib/QtWidgets.framework/Headers/QWidget \
+		/opt/homebrew/lib/QtWidgets.framework/Headers/qwidget.h \
+		qcustomplot.h \
+		/opt/homebrew/lib/QtCore.framework/Headers/qmath.h \
+		/opt/homebrew/lib/QtCore.framework/Headers/qnumeric.h \
+		/opt/homebrew/lib/QtCore.framework/Headers/QtNumeric \
 		gridwidget.h \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/QGraphicsView \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/qgraphicsview.h \
@@ -1347,17 +1362,6 @@ main.o: main.cpp mainwindow.h \
 		/opt/homebrew/lib/QtGui.framework/Headers/qcolor.h \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/QLabel \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/qlabel.h \
-		graphwidget.h \
-		/opt/homebrew/lib/QtWidgets.framework/Headers/QMessageBox \
-		/opt/homebrew/lib/QtWidgets.framework/Headers/qmessagebox.h \
-		/opt/homebrew/lib/QtWidgets.framework/Headers/QVBoxLayout \
-		/opt/homebrew/lib/QtWidgets.framework/Headers/qboxlayout.h \
-		/opt/homebrew/lib/QtWidgets.framework/Headers/QWidget \
-		/opt/homebrew/lib/QtWidgets.framework/Headers/qwidget.h \
-		qcustomplot.h \
-		/opt/homebrew/lib/QtCore.framework/Headers/qmath.h \
-		/opt/homebrew/lib/QtCore.framework/Headers/qnumeric.h \
-		/opt/homebrew/lib/QtCore.framework/Headers/QtNumeric \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/QCheckBox \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/qcheckbox.h \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/QComboBox \
@@ -1375,6 +1379,17 @@ main.o: main.cpp mainwindow.h \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 mainwindow.o: mainwindow.cpp mainwindow.h \
+		graphwidget.h \
+		/opt/homebrew/lib/QtWidgets.framework/Headers/QMessageBox \
+		/opt/homebrew/lib/QtWidgets.framework/Headers/qmessagebox.h \
+		/opt/homebrew/lib/QtWidgets.framework/Headers/QVBoxLayout \
+		/opt/homebrew/lib/QtWidgets.framework/Headers/qboxlayout.h \
+		/opt/homebrew/lib/QtWidgets.framework/Headers/QWidget \
+		/opt/homebrew/lib/QtWidgets.framework/Headers/qwidget.h \
+		qcustomplot.h \
+		/opt/homebrew/lib/QtCore.framework/Headers/qmath.h \
+		/opt/homebrew/lib/QtCore.framework/Headers/qnumeric.h \
+		/opt/homebrew/lib/QtCore.framework/Headers/QtNumeric \
 		gridwidget.h \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/QGraphicsView \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/qgraphicsview.h \
@@ -1392,17 +1407,6 @@ mainwindow.o: mainwindow.cpp mainwindow.h \
 		/opt/homebrew/lib/QtGui.framework/Headers/qcolor.h \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/QLabel \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/qlabel.h \
-		graphwidget.h \
-		/opt/homebrew/lib/QtWidgets.framework/Headers/QMessageBox \
-		/opt/homebrew/lib/QtWidgets.framework/Headers/qmessagebox.h \
-		/opt/homebrew/lib/QtWidgets.framework/Headers/QVBoxLayout \
-		/opt/homebrew/lib/QtWidgets.framework/Headers/qboxlayout.h \
-		/opt/homebrew/lib/QtWidgets.framework/Headers/QWidget \
-		/opt/homebrew/lib/QtWidgets.framework/Headers/qwidget.h \
-		qcustomplot.h \
-		/opt/homebrew/lib/QtCore.framework/Headers/qmath.h \
-		/opt/homebrew/lib/QtCore.framework/Headers/qnumeric.h \
-		/opt/homebrew/lib/QtCore.framework/Headers/QtNumeric \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/QCheckBox \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/qcheckbox.h \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/QComboBox \
@@ -1415,6 +1419,95 @@ mainwindow.o: mainwindow.cpp mainwindow.h \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/qslider.h \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/QTabWidget \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/qtabwidget.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Cpp.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Include.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/hdf5.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5public.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5pubconf.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5version.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5api_adpt.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Apublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Ipublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Opublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Tpublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5ACpublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Cpublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Dpublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Epublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Epubgen.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5ESpublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Fpublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDpublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Gpublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Lpublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Mpublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5VLpublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5VLconnector.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Rpublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5MMpublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Ppublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Spublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Zpublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5PLpublic.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5ESdevelop.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDdevelop.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Idevelop.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Ldevelop.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Tdevelop.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5TSdevelop.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Zdevelop.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5VLconnector_passthru.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5VLnative.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDcore.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDdirect.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDfamily.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDhdfs.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDlog.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDmirror.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDmpi.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDmpio.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDmulti.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDonion.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDros3.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDsec2.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDsplitter.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDstdio.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDwindows.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDsubfiling.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FDioc.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5VLpassthru.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Exception.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5IdComponent.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5DataSpace.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5PropList.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FaccProp.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FcreatProp.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5OcreatProp.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5DcreatProp.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5DxferProp.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5LcreatProp.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5LaccProp.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5DaccProp.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Location.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Classes.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Object.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5AbstractDs.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Attribute.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5DataType.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5AtomType.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5PredType.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5EnumType.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5IntType.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5FloatType.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5StrType.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5CompType.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5ArrayType.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5VarLenType.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5DataSet.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5CommonFG.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Group.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5File.h \
+		/opt/homebrew/Cellar/hdf5/1.14.3_1/include/H5Library.h \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/QGraphicsScene \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/qgraphicsscene.h \
 		/opt/homebrew/lib/QtWidgets.framework/Headers/QMenuBar \
