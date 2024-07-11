@@ -27,9 +27,9 @@ void GraphWidget::setupPlotWidgets() {
     plotWidget->axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical);
     plotWidget->axisRect()->setRangeDrag(Qt::Horizontal | Qt::Vertical);
 
-    QCPItemLine *redLine = new QCPItemLine(plotWidget);
-    redLine->setPen(QPen(Qt::red, 2));
-    redLines.append(redLine);
+    // QCPItemLine *redLine = new QCPItemLine(plotWidget);
+    // redLine->setPen(QPen(Qt::red, 2));
+    // redLines.append(redLine);
 
     QCPGraph *plot = plotWidget->addGraph();
     QPen pen = plot->pen();
@@ -177,7 +177,7 @@ void GraphWidget::onMouseRelease(QMouseEvent *event) {
   }
 }
 
-void GraphWidget::simplePlot(const QList<double> &x, const QList<double> &y,
+void GraphWidget::simplePlot(const QVector<double> &x, const QVector<double> &y,
                              int plotIndex) {
   if (plotIndex < 0 || plotIndex >= plots.size()) {
     qWarning() << "Invalid plot index:" << plotIndex;

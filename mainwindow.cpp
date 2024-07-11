@@ -111,9 +111,8 @@ std::vector<ChannelData> get_cat_envelop(const std::string &FileName) {
     int bitDepth =
         static_cast<int>(readDataset("/3BRecInfo/3BRecVars/BitDepth"));
 
-    // Calculate qLevel using bitwise XOR
     uint64_t qLevel =
-        static_cast<uint64_t>(2) ^ static_cast<uint64_t>(bitDepth);
+        static_cast<uint64_t>(1) ^ static_cast<uint64_t>(bitDepth);
 
     double fromQLevelToUVolt =
         (maxUVolt - minUVolt) / static_cast<double>(qLevel);
@@ -125,42 +124,95 @@ std::vector<ChannelData> get_cat_envelop(const std::string &FileName) {
 
     H5::DataSet full_data = file.openDataSet("/3BData/Raw");
     H5::DataSpace dataspace = full_data.getSpace();
-    hsize_t dims[2];
-    dataspace.getSimpleExtentDims(dims, NULL);
+    int rank = dataspace.getSimpleExtentNdims();
+    std::vector<hsize_t> dims(rank);
+    dataspace.getSimpleExtentDims(dims.data(), NULL);
+
+    QString debugInfo = QString("Raw data dimensions: %1\n"
+                                "NRecFrames: %2\n"
+                                "Sampling Rate: %3\n"
+                                "Signal Inversion: %4\n"
+                                "Max Voltage: %5\n"
+                                "Min Voltage: %6\n"
+                                "Bit Depth: %7\n"
+                                "Q Level: %8\n"
+                                "From Q Level to Voltage: %9\n"
+                                "ADC Counts to MV: %10\n"
+                                "MV Offset: %11\n"
+                                "Total channels: %12\n"
+                                "Calculated channels: %13")
+                            .arg(dims[0])
+                            .arg(NRecFrames)
+                            .arg(sampRate)
+                            .arg(signalInversion)
+                            .arg(maxUVolt)
+                            .arg(minUVolt)
+                            .arg(bitDepth)
+                            .arg(qLevel)
+                            .arg(fromQLevelToUVolt)
+                            .arg(ADCCountsToMV)
+                            .arg(MVOffset)
+                            .arg(total_channels)
+                            .arg(dims[0] / NRecFrames);
+
+    QMessageBox::information(nullptr, "Debug Info", debugInfo);
+
+    if (rank != 1) {
+      throw std::runtime_error("Unexpected number of dimensions in raw data");
+    }
+
+    if (dims[0] != static_cast<hsize_t>(NRecFrames * total_channels)) {
+      QString warningMsg = QString("Warning: Data size mismatch.\n"
+                                   "Expected size: %1\n"
+                                   "Actual size: %2")
+                               .arg(NRecFrames * total_channels)
+                               .arg(dims[0]);
+      QMessageBox::warning(nullptr, "Size Mismatch", warningMsg);
+    }
 
     std::vector<ChannelData> channelDataList;
+    channelDataList.reserve(total_channels);
+
+    // Read all data at once
+    std::vector<int16_t> all_data(dims[0]);
+    full_data.read(all_data.data(), H5::PredType::NATIVE_INT16);
 
     for (int k = 0; k < total_channels; ++k) {
-      std::vector<double> channel_data(NRecFrames);
-      hsize_t count[2] = {static_cast<hsize_t>(NRecFrames), 1};
-      hsize_t offset[2] = {0, static_cast<hsize_t>(k)};
-      H5::DataSpace memspace(1, count);
-      H5::DataSpace filespace = full_data.getSpace();
-      filespace.selectHyperslab(H5S_SELECT_SET, count, offset);
-      full_data.read(channel_data.data(), H5::PredType::NATIVE_DOUBLE, memspace,
-                     filespace);
+      ChannelData ch_data;
+      ch_data.signal.reserve(NRecFrames);
 
-      for (auto &val : channel_data) {
-        val = (val * ADCCountsToMV + MVOffset) / 10000000.0;
+      for (long long i = 0; i < NRecFrames; ++i) {
+        double val = static_cast<double>(all_data[i * total_channels + k]);
+        val = (val * ADCCountsToMV + MVOffset) / 1000000.0; // Convert to mV
+        ch_data.signal.push_back(val);
+      }
+      // Center the signal data around 0
+      double mean =
+          std::accumulate(ch_data.signal.begin(), ch_data.signal.end(), 0.0) /
+          ch_data.signal.size();
+
+      for (auto &val : ch_data.signal) {
+        val -= mean;
       }
 
-      ChannelData ch_data;
-      ch_data.signal = std::move(channel_data);
       ch_data.name = {Rows[k], Cols[k]};
-
       channelDataList.push_back(std::move(ch_data));
     }
 
     return channelDataList;
   } catch (H5::Exception &error) {
-    std::cerr << "H5 Exception: ";
+    std::string errorMsg = "H5 Exception: ";
     error.printErrorStack();
+    errorMsg += error.getDetailMsg();
+    QMessageBox::critical(nullptr, "HDF5 Error",
+                          QString::fromStdString(errorMsg));
     throw std::runtime_error("Error reading HDF5 file");
   } catch (std::exception &e) {
-    std::cerr << "Standard exception: " << e.what() << std::endl;
+    QMessageBox::critical(nullptr, "Standard Exception", e.what());
     throw;
   } catch (...) {
-    std::cerr << "Unknown exception occurred" << std::endl;
+    QMessageBox::critical(nullptr, "Unknown Exception",
+                          "An unknown exception occurred");
     throw;
   }
 }
@@ -177,8 +229,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 }
 
 void MainWindow::testGraph() {
-  std::string filePath = "Users/booka66/Jake-Squared/Sz_SE_Detection/"
-                         "5_1_24_slice3A_resample_300.brw";
+  std::string filePath =
+      "~/Jake-Squared/Sz_SE_Detection/5_13_24_slice1B_resample_100.brw";
 
   // Expand the ~ in the file path
   if (filePath.find("~") == 0) {

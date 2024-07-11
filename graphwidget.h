@@ -21,7 +21,7 @@ public:
   void toggleMiniMap(bool checked);
   void updateRedLines(double value, double samplingRate);
   void changeViewMode(const QString &mode);
-  void simplePlot(const QList<double> &x, const QList<double> &y,
+  void simplePlot(const QVector<double> &x, const QVector<double> &y,
                   int graphIndex);
   QVector<QCustomPlot *> plotWidgets;
 
