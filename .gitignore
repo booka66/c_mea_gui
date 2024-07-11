@@ -38,3 +38,7 @@ moc_*.h
 # Stash files
 *.stash
 
+compile_commands.json
+Makefile
+.cache/
+
