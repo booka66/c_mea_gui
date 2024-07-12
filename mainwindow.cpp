@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "constants.h"
 #include "graphwidget.h"
 #include "gridwidget.h"
 #include <H5Cpp.h>
@@ -31,19 +32,13 @@ struct ElectrodeInfo {
 std::pair<std::vector<int>, std::vector<int>>
 getChs(const std::string &FilePath) {
   try {
-    std::cout << "Opening file: " << FilePath << std::endl;
     H5::H5File file(FilePath, H5F_ACC_RDONLY);
 
-    std::cout << "Opening dataset: /3BRecInfo/3BMeaStreams/Raw/Chs"
-              << std::endl;
     H5::DataSet dataset = file.openDataSet("/3BRecInfo/3BMeaStreams/Raw/Chs");
 
     H5::DataSpace dataspace = dataset.getSpace();
     hsize_t dims[2];
     int ndims = dataspace.getSimpleExtentDims(dims, NULL);
-
-    std::cout << "Dataset dimensions: " << dims[0] << " x " << dims[1]
-              << std::endl;
 
     H5::CompType mtype(sizeof(int) * 2);
     mtype.insertMember("Row", 0, H5::PredType::NATIVE_INT);
@@ -51,7 +46,6 @@ getChs(const std::string &FilePath) {
 
     std::vector<std::pair<int, int>> data(dims[0]);
 
-    std::cout << "Reading dataset" << std::endl;
     dataset.read(data.data(), mtype);
 
     std::vector<int> rows(dims[0]);
@@ -61,9 +55,6 @@ getChs(const std::string &FilePath) {
       rows[i] = data[i].first;
       cols[i] = data[i].second;
     }
-
-    std::cout << "Successfully read " << rows.size() << " rows and columns"
-              << std::endl;
 
     return std::make_pair(std::move(rows), std::move(cols));
   } catch (H5::Exception &error) {
@@ -128,34 +119,34 @@ std::vector<ChannelData> get_cat_envelop(const std::string &FileName) {
     std::vector<hsize_t> dims(rank);
     dataspace.getSimpleExtentDims(dims.data(), NULL);
 
-    QString debugInfo = QString("Raw data dimensions: %1\n"
-                                "NRecFrames: %2\n"
-                                "Sampling Rate: %3\n"
-                                "Signal Inversion: %4\n"
-                                "Max Voltage: %5\n"
-                                "Min Voltage: %6\n"
-                                "Bit Depth: %7\n"
-                                "Q Level: %8\n"
-                                "From Q Level to Voltage: %9\n"
-                                "ADC Counts to MV: %10\n"
-                                "MV Offset: %11\n"
-                                "Total channels: %12\n"
-                                "Calculated channels: %13")
-                            .arg(dims[0])
-                            .arg(NRecFrames)
-                            .arg(sampRate)
-                            .arg(signalInversion)
-                            .arg(maxUVolt)
-                            .arg(minUVolt)
-                            .arg(bitDepth)
-                            .arg(qLevel)
-                            .arg(fromQLevelToUVolt)
-                            .arg(ADCCountsToMV)
-                            .arg(MVOffset)
-                            .arg(total_channels)
-                            .arg(dims[0] / NRecFrames);
-
-    QMessageBox::information(nullptr, "Debug Info", debugInfo);
+    // QString debugInfo = QString("Raw data dimensions: %1\n"
+    //                             "NRecFrames: %2\n"
+    //                             "Sampling Rate: %3\n"
+    //                             "Signal Inversion: %4\n"
+    //                             "Max Voltage: %5\n"
+    //                             "Min Voltage: %6\n"
+    //                             "Bit Depth: %7\n"
+    //                             "Q Level: %8\n"
+    //                             "From Q Level to Voltage: %9\n"
+    //                             "ADC Counts to MV: %10\n"
+    //                             "MV Offset: %11\n"
+    //                             "Total channels: %12\n"
+    //                             "Calculated channels: %13")
+    //                         .arg(dims[0])
+    //                         .arg(NRecFrames)
+    //                         .arg(sampRate)
+    //                         .arg(signalInversion)
+    //                         .arg(maxUVolt)
+    //                         .arg(minUVolt)
+    //                         .arg(bitDepth)
+    //                         .arg(qLevel)
+    //                         .arg(fromQLevelToUVolt)
+    //                         .arg(ADCCountsToMV)
+    //                         .arg(MVOffset)
+    //                         .arg(total_channels)
+    //                         .arg(dims[0] / NRecFrames);
+    //
+    // QMessageBox::information(nullptr, "Debug Info", debugInfo);
 
     if (rank != 1) {
       throw std::runtime_error("Unexpected number of dimensions in raw data");
@@ -173,7 +164,6 @@ std::vector<ChannelData> get_cat_envelop(const std::string &FileName) {
     std::vector<ChannelData> channelDataList;
     channelDataList.reserve(total_channels);
 
-    // Read all data at once
     std::vector<int16_t> all_data(dims[0]);
     full_data.read(all_data.data(), H5::PredType::NATIVE_INT16);
 
@@ -186,7 +176,6 @@ std::vector<ChannelData> get_cat_envelop(const std::string &FileName) {
         val = (val * ADCCountsToMV + MVOffset) / 1000000.0; // Convert to mV
         ch_data.signal.push_back(val);
       }
-      // Center the signal data around 0
       double mean =
           std::accumulate(ch_data.signal.begin(), ch_data.signal.end(), 0.0) /
           ch_data.signal.size();
@@ -232,12 +221,10 @@ void MainWindow::testGraph() {
   std::string filePath =
       "~/Jake-Squared/Sz_SE_Detection/5_13_24_slice1B_resample_100.brw";
 
-  // Expand the ~ in the file path
   if (filePath.find("~") == 0) {
     filePath.replace(0, 1, QDir::homePath().toStdString());
   }
 
-  // Check if file exists
   QFileInfo checkFile(QString::fromStdString(filePath));
   if (!checkFile.exists() || !checkFile.isFile()) {
     QMessageBox::critical(this, "Error",
@@ -246,7 +233,6 @@ void MainWindow::testGraph() {
     return;
   }
 
-  // Check file permissions
   if (!checkFile.isReadable()) {
     QMessageBox::critical(this, "Error",
                           "File is not readable: " +
@@ -255,23 +241,12 @@ void MainWindow::testGraph() {
   }
 
   try {
-    // Try to open the file without reading data
     H5::H5File file(filePath, H5F_ACC_RDONLY);
 
-    // If we got here, the file opened successfully
-    QMessageBox::information(this, "Success", "HDF5 file opened successfully.");
-
-    // Now try to load the data
     auto channelDataList = get_cat_envelop(filePath);
 
-    // If we got here, data was loaded successfully
-    QMessageBox::information(
-        this, "Success",
-        QString("Data loaded successfully.\nTotal channels: %1")
-            .arg(channelDataList.size()));
-
     // Plot the data for each channel
-    for (size_t i = 0; i < 4; ++i) {
+    for (size_t i = 0; i < PLOT_COUNT; ++i) {
       const auto &channelData = channelDataList[i];
 
       // Create x-axis data (time)

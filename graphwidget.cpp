@@ -1,4 +1,5 @@
 #include "graphwidget.h"
+#include "constants.h"
 #include <algorithm>
 
 GraphWidget::GraphWidget(QWidget *parent)
@@ -9,8 +10,8 @@ GraphWidget::GraphWidget(QWidget *parent)
   setupMinimap();
   setupPlotWidgets();
 
-  xData.resize(4);
-  yData.resize(4);
+  xData.resize(PLOT_COUNT);
+  yData.resize(PLOT_COUNT);
   setupPlotInteractions();
   linkAxes();
 }
@@ -21,7 +22,7 @@ void GraphWidget::setupPlotWidgets() {
   plotsLayout->setContentsMargins(0, 0, 0, 0);
   plotsLayout->setSpacing(0);
 
-  for (int i = 0; i < 4; ++i) {
+  for (int i = 0; i < PLOT_COUNT; ++i) {
     QCustomPlot *plotWidget = new QCustomPlot(this);
     plotWidget->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     plotWidget->axisRect()->setRangeZoom(Qt::Horizontal | Qt::Vertical);
@@ -33,7 +34,7 @@ void GraphWidget::setupPlotWidgets() {
 
     QCPGraph *plot = plotWidget->addGraph();
     QPen pen = plot->pen();
-    pen.setColor(Qt::red);
+    pen.setColor(Qt::darkBlue);
     plot->setPen(pen);
 
     plots.append(plot);

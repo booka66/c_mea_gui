@@ -1,4 +1,5 @@
-greaterThan(QT_MAJOR_VERSION, 4): QT += core gui widgets printsupport
+greaterThan(QT_MAJOR_VERSION, 4): QT += core gui widgets printsupport opengl
+DEFINES += QCUSTOMPLOT_USE_OPENGL
 INCLUDEPATH += /opt/homebrew/Cellar/hdf5/1.14.3_1/include
 LIBS += -L/opt/homebrew/Cellar/hdf5/1.14.3_1/lib -lhdf5 -lhdf5_cpp
 CONFIG += c++17

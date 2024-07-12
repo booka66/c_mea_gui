@@ -71,6 +71,7 @@ private:
                                  const QVector<double> &y, int numPoints);
   void setupPlotInteractions();
   void linkAxes();
+  void initialReplot();
 };
 
 #endif // GRAPHWIDGET_H
